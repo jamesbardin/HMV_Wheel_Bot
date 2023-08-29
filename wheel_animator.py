@@ -3,6 +3,8 @@ import random
 import math
 from particle import Particle
 import time
+import imageio.v2 as imageio
+import numpy
 
 pygame.init()
 
@@ -13,7 +15,7 @@ WIDTH, HEIGHT = 500, 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-names = ["Alice", "Bob", "Charlie", "David", "James"]
+names = ["Lobo", "Cal", "Azim", "Cubes", "Log", "Berty", "McGub", "Xuanthe", "Big O", "James", "Tregar", "Quinn", "Adrian", "Wooly"]
 font = pygame.font.SysFont(None, 36)
 
 center = (WIDTH // 2, HEIGHT // 2)
@@ -24,7 +26,20 @@ celebrate = False
 celebrate_time = 0 
 MAX_CELEBRATE_TIME = 200 
 
+frames = []
+
 colors = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for _ in names]
+selected_word = None
+
+colorful_words = ["Awesome!", "Fantastic!", "Congrats kid!", "Get fucked!", "Sucks to suck!"]
+
+def display_random_word(surface):
+    word = random.choice(colorful_words)
+    color = generate_color()
+    word_surface = font.render(word, True, color)
+    word_position = (center[0] - word_surface.get_width() // 2, center[1] - word_surface.get_height() // 2)
+    draw_text_with_outline(screen, word, word_position, font, color, BLACK)
+
 
 def draw_text_with_outline(surface, text, position, font, text_color, outline_color):
     x, y = position
@@ -55,8 +70,8 @@ def draw_wheel(angle):
             points.append((center[0] + radius * math.cos(math.radians(segment_start)), center[1] + radius * math.sin(math.radians(segment_start))))
         pygame.draw.polygon(screen, color, points)
         
-        name_position = (center[0] + (radius // 2) * math.cos(math.radians((start_angle + end_angle) / 2)),
-                     center[1] + (radius // 2) * math.sin(math.radians((start_angle + end_angle) / 2)))
+        name_position = (center[0] + (radius * 0.8) * math.cos(math.radians((start_angle + end_angle) / 2)),
+                     center[1] + (radius * 0.8) * math.sin(math.radians((start_angle + end_angle) / 2)))
 
         text_surface = font.render(name, True, BLACK)
         text_position = (name_position[0] - text_surface.get_width() // 2, name_position[1] - text_surface.get_height() // 2)
@@ -91,11 +106,21 @@ while True:
     draw_ticker()
 
     if celebrate:
+        if not selected_word:
+            selected_word = random.choice(colorful_words)
+
+        # Draw the selected word for the specified range
+        if 100 <= celebrate_time <= 300:  
+            color = generate_color()
+            word_surface = font.render(selected_word, True, color)
+            word_position = (center[0] - word_surface.get_width() // 2, center[1] - word_surface.get_height() // 2)
+            draw_text_with_outline(screen, selected_word, word_position, font, color, BLACK)
+        
         for particle in particles:
             particle.move()
             particle.draw(screen)
+        
         celebrate_time += 1
-
         if celebrate_time >= MAX_CELEBRATE_TIME:
             break
 
@@ -106,11 +131,20 @@ while True:
         if spin_speed <= 0 and not celebrate:
             for _ in range(200): 
                 color = generate_color()
-                particles.append(Particle(random.randint(0, WIDTH), 0, color))
+                particles.append(Particle(random.randint(0, WIDTH), 0))
             celebrate = True
 
     pygame.display.flip()
+    # image = pygame.surfarray.array3d(screen)
+    # rotated_image = numpy.rot90(image)
+    # frames.append(rotated_image)
+    frame = pygame.surfarray.array3d(screen)
+    frame = numpy.rot90(frame)
+    frames.append(numpy.flipud(frame))
+
+
     clock.tick(60)
 
+imageio.mimsave('gifs/wheel_animation.gif', frames, duration=20)
 
 pygame.quit()

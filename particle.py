@@ -1,12 +1,15 @@
 import random
 import math
-import pygame 
+import pygame
 
 class Particle:
-    def __init__(self, x, y, color):
+    # Load the image once, so it's shared across all particles
+    PERSON_IMAGE = pygame.image.load("C:\HMV_Wheel_Bot\pfp\ise.jpeg")
+    PERSON_IMAGE = pygame.transform.scale(PERSON_IMAGE, (50, 40))  # Resize image if needed
+
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.color = color
         self.speed = random.uniform(2, 5)
         self.direction = random.uniform(0, 2 * math.pi)
 
@@ -15,4 +18,4 @@ class Particle:
         self.y += self.speed * math.sin(self.direction)
 
     def draw(self, surface):
-        pygame.draw.circle(surface, self.color, (int(self.x), int(self.y)), 3)
+        surface.blit(self.PERSON_IMAGE, (self.x, self.y))
